@@ -18,21 +18,45 @@ main{padding:20px 14px 50px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-
 .login-card .login-mark{font-size:2.3rem}.login-card .eyebrow{color:var(--blue);margin:6px 0}.login-card h2{font-size:1.7rem;margin:5px 0 8px;color:var(--navy)}.login-card p{color:var(--muted)}
 .login-card label{display:block;font-weight:700;margin:18px 0 6px}.login-card button{width:100%;margin-top:14px;border:0;border-radius:10px;background:var(--blue);color:white;padding:12px 16px;font:inherit;font-weight:750;cursor:pointer}.login-error{color:var(--red)!important;font-size:.9rem;min-height:1.2em}
 
+
+.hidden{display:none!important}
+.login-card input{width:100%;box-sizing:border-box;border:1px solid #bcccdc;border-radius:10px;padding:12px;font:inherit;margin-bottom:6px}
+.login-actions{display:grid;gap:10px;margin-top:14px}
+.login-card button{width:100%;margin-top:8px;border:0;border-radius:10px;background:var(--blue);color:white;padding:12px 14px;font:inherit;font-weight:750;cursor:pointer}
+.login-card button.secondary{background:#eaf3f7;color:var(--navy)}
+.code-panel{margin-top:16px;padding:14px;border-radius:12px;background:#f0f9ff;border:1px solid #bae6fd}
+.generated-code{font:800 1.6rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;text-align:center;background:white;border:1px dashed #0284c7;border-radius:10px;padding:10px;margin:8px 0;overflow-wrap:anywhere;color:#075985}
+.login-warning{font-size:.88rem!important;color:#9a3412!important}
+
 </style>
 </head>
 <body>
 
 <div id="studentLogin" class="login-overlay">
-  <form id="studentLoginForm" class="login-card">
+  <div class="login-card">
     <div class="login-mark">📘</div>
     <p class="eyebrow">CLASS IX • ENGLISH PRACTICE</p>
-    <h2>Welcome, Student!</h2>
-    <p>Enter your name to open the 95-mark practice paper. Your objective marks will be saved.</p>
+    <h2>Student Login</h2>
+    <p>New here? Get a personal code. Returning student? Enter the same name and code you received earlier.</p>
     <label for="studentName">Your name</label>
     <input id="studentName" name="studentName" maxlength="80" autocomplete="name" required placeholder="Enter your full name">
-    <button id="studentLoginBtn" type="submit">Start Paper →</button>
+    <div id="studentCodeWrap" class="hidden">
+      <label for="studentCode">Your personal code</label>
+      <input id="studentCode" name="studentCode" maxlength="10" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter your 10-character code">
+    </div>
+    <div id="newCodePanel" class="hidden code-panel">
+      <p>🎉 Your personal login code is:</p>
+      <div id="generatedCode" class="generated-code">XXXXXXXXXX</div>
+      <button id="copyCodeBtn" class="secondary" type="button">Copy code</button>
+      <p class="login-warning">Save this code somewhere safe. You’ll need it whenever you return. It will not be shown again.</p>
+      <button id="startWithCodeBtn" type="button">I've saved it — Start Paper →</button>
+    </div>
+    <div id="loginActions" class="login-actions">
+      <button id="newStudentBtn" type="button">New Student — Generate Code</button>
+      <button id="returningStudentBtn" class="secondary" type="button">Returning Student — Enter Code</button>
+    </div>
     <p id="studentLoginError" class="login-error" role="status"></p>
-  </form>
+  </div>
 </div>
 <header><div class="wrap">
 <div class="eyebrow">Board-style practice • Self-test</div>
@@ -203,54 +227,104 @@ const ENGLISH_SUPABASE_URL = "https://bhtyestavehwaymfozxw.supabase.co";
 const ENGLISH_SUPABASE_KEY = "sb_publishable_VpUhQZY8bczeIYv-oo8mLQ_YHPTjm7r";
 const englishSupabase = window.supabase.createClient(ENGLISH_SUPABASE_URL, ENGLISH_SUPABASE_KEY);
 let englishStudentName = "";
-document.getElementById('studentName').value = localStorage.getItem('englishStudentName') || "";
-document.getElementById('studentLoginForm').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const name = document.getElementById('studentName').value.trim();
-  const errorBox = document.getElementById('studentLoginError');
-  const button = document.getElementById('studentLoginBtn');
-  if (!name) { errorBox.textContent = 'Please enter your name.'; return; }
-  button.disabled = true; button.textContent = 'Connecting…'; errorBox.textContent = '';
+let englishStudentCode = "";
+const loginError = document.getElementById('studentLoginError');
+const nameInput = document.getElementById('studentName');
+const codeInput = document.getElementById('studentCode');
+nameInput.value = localStorage.getItem('englishStudentName') || "";
+function openPaper(name, code) {
+  englishStudentName = name.trim();
+  englishStudentCode = code.trim().toUpperCase();
+  localStorage.setItem('englishStudentName', englishStudentName);
+  document.getElementById('studentLogin').style.display = 'none';
+}
+function showCodeEntry() {
+  loginError.textContent = '';
+  document.getElementById('newCodePanel').classList.add('hidden');
+  document.getElementById('loginActions').classList.remove('hidden');
+  document.getElementById('studentCodeWrap').classList.remove('hidden');
+  codeInput.focus();
+}
+document.getElementById('newStudentBtn').addEventListener('click', async () => {
+  const name = nameInput.value.trim();
+  if (!name) { loginError.textContent = 'Please enter your name first.'; nameInput.focus(); return; }
+  const button = document.getElementById('newStudentBtn');
+  button.disabled = true; button.textContent = 'Generating secure code…'; loginError.textContent = '';
   try {
-    let { data: sessionData, error: sessionError } = await englishSupabase.auth.getSession();
-    if (sessionError) throw sessionError;
-    if (sessionData.session && !sessionData.session.user.is_anonymous) {
-      const signedOut = await englishSupabase.auth.signOut();
-      if (signedOut.error) throw signedOut.error;
-      sessionData = {session:null};
-    }
-    if (!sessionData.session) {
-      const authResult = await englishSupabase.auth.signInAnonymously();
-      if (authResult.error) throw authResult.error;
-    }
-    englishStudentName = name;
-    localStorage.setItem('englishStudentName', name);
-    document.getElementById('studentLogin').style.display = 'none';
+    const { data, error } = await englishSupabase.rpc('register_english_student', {p_name:name});
+    if (error) throw error;
+    const student = Array.isArray(data) ? data[0] : data;
+    if (!student || !student.access_code) throw new Error('No code was returned. Please try again.');
+    englishStudentName = student.student_name;
+    englishStudentCode = student.access_code;
+    document.getElementById('generatedCode').textContent = student.access_code;
+    document.getElementById('newCodePanel').classList.remove('hidden');
+    document.getElementById('loginActions').classList.add('hidden');
+    document.getElementById('studentCodeWrap').classList.add('hidden');
+    localStorage.setItem('englishStudentName', student.student_name);
   } catch (error) {
-    errorBox.textContent = 'Supabase connection failed: ' + (error.message || 'Please enable Anonymous Sign-Ins in Supabase Auth settings and try again.');
+    loginError.textContent = error.message || 'Could not register. If this name already exists, use Returning Student and enter your code.';
   } finally {
-    button.disabled = false; button.textContent = 'Start Paper →';
+    button.disabled = false; button.textContent = 'New Student — Generate Code';
+  }
+});
+document.getElementById('returningStudentBtn').addEventListener('click', showCodeEntry);
+document.getElementById('studentCode').addEventListener('keydown', event => {
+  if (event.key === 'Enter') document.getElementById('startWithCodeBtn').click();
+});
+document.getElementById('startWithCodeBtn').addEventListener('click', () => {
+  if (!englishStudentName || !englishStudentCode) { loginError.textContent = 'Generate your code first.'; return; }
+  openPaper(englishStudentName, englishStudentCode);
+});
+document.getElementById('copyCodeBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(englishStudentCode);
+    document.getElementById('copyCodeBtn').textContent = 'Copied ✓';
+  } catch (_) {
+    loginError.textContent = 'Please select and copy the code manually.';
+  }
+});
+document.getElementById('returningStudentBtn').addEventListener('click', async () => {
+  document.getElementById('newCodePanel').classList.add('hidden');
+  document.getElementById('loginActions').classList.add('hidden');
+  document.getElementById('studentCodeWrap').classList.remove('hidden');
+  loginError.textContent = '';
+  const name = nameInput.value.trim();
+  const code = codeInput.value.trim().toUpperCase();
+  if (!name) { loginError.textContent = 'Please enter your name first.'; document.getElementById('loginActions').classList.remove('hidden'); nameInput.focus(); return; }
+  if (!code) { document.getElementById('loginActions').classList.remove('hidden'); loginError.textContent = 'Enter your personal code, then tap Returning Student again.'; codeInput.focus(); return; }
+  const button = document.getElementById('returningStudentBtn');
+  button.disabled = true; button.textContent = 'Checking code…';
+  try {
+    const { data, error } = await englishSupabase.rpc('login_english_student', {p_name:name, p_code:code});
+    if (error) throw error;
+    const student = Array.isArray(data) ? data[0] : data;
+    if (!student) throw new Error('Name or code is incorrect. Please check both and try again.');
+    openPaper(student.student_name, code);
+  } catch (error) {
+    loginError.textContent = error.message || 'Could not sign in. Please try again.';
+    document.getElementById('loginActions').classList.remove('hidden');
+  } finally {
+    button.disabled = false; button.textContent = 'Returning Student — Enter Code';
   }
 });
 async function saveStudentResult(score) {
   const status = document.getElementById('cloudSaveStatus');
   try {
-    const { data: sessionData, error: sessionError } = await englishSupabase.auth.getSession();
-    if (sessionError) throw sessionError;
-    if (!sessionData.session || !sessionData.session.user.is_anonymous) throw new Error('Student session missing. Refresh and enter your name again.');
-    const { error } = await englishSupabase.from('english_paper_results').insert({
-      student_id: sessionData.session.user.id,
-      student_name: englishStudentName || localStorage.getItem('englishStudentName') || 'Student',
-      objective_marks: score
+    if (!englishStudentName || !englishStudentCode) throw new Error('Please sign in with your name and personal code again.');
+    const { data, error } = await englishSupabase.rpc('submit_english_code_result', {
+      p_name: englishStudentName,
+      p_code: englishStudentCode,
+      p_objective_marks: score
     });
     if (error) throw error;
-    status.textContent = '☁️ Marks saved to Supabase! Objective score: ' + score + '/35. Written marks will be added by the teacher/admin.';
+    const result = Array.isArray(data) ? data[0] : data;
+    status.textContent = '☁️ Marks saved securely! Objective score: ' + score + '/35. Keep your personal code safe for next time.';
     status.style.color = 'var(--green)';
   } catch (error) {
-    status.textContent = '⚠️ Could not save marks to Supabase: ' + (error.message || 'Check your connection and Supabase settings.');
+    status.textContent = '⚠️ Could not save marks: ' + (error.message || 'Check your connection and personal code.');
     status.style.color = 'var(--red)';
   }
-}
-</script>
+}</script>
 
 </body></html>
