@@ -54,7 +54,7 @@ async function checkAdmin(){
 function showLogin(){el('dashboard').classList.add('hidden');el('loginPanel').classList.remove('hidden')}
 async function loadResults(){
  el('dashboardStatus').textContent='Loading…';
- const {data,error}=await db.from('english_paper_results').select('id,student_name,objective_marks,written_marks,total_marks,submitted_at').order('submitted_at',{ascending:false});
+ const {data,error}=await db.from('english_paper_code_results').select('id,student_name,objective_marks,written_marks,total_marks,submitted_at').order('submitted_at',{ascending:false});
  if(error){el('dashboardStatus').textContent='Could not load marks: '+error.message;return}
  allResults=data||[];el('summary').textContent=allResults.length+' submission(s) saved';renderResults();
  el('dashboardStatus').textContent='';
