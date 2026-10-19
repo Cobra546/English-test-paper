@@ -52,9 +52,15 @@ main{padding:20px 14px 50px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-
 <p class="qtitle" style="margin-top:13px">2. Mention one value or feeling expressed in the poem and explain why it matters.</p><textarea name="child2" class="small-answer" placeholder="Answer…"></textarea>
 </div></div></section>
 <section class="section"><div class="section-head"><h2>Section D — Grammar & Language (15 marks)</h2><p>Attempt all questions. 1 mark each.</p></div><div class="section-body" id="grammar"></div></section>
-<section class="section"><div class="section-head"><h2>Section E — Writing (10 marks)</h2><p>Attempt ONE writing task. Marks are for content, organization, grammar and spelling.</p></div><div class="section-body">
-<div class="q"><p class="qtitle">Option A — Essay <span class="marks">(10 marks)</span></p><p>Write an essay of 150–200 words on <strong>“The Importance of Education in Our Life”</strong>. Include an introduction, supporting points and a conclusion.</p><textarea name="essay" style="min-height:220px" placeholder="Write your essay here…"></textarea></div>
-<div class="q"><p class="qtitle">Option B — Formal application <span class="marks">(10 marks)</span></p><p>Write an application to your school principal requesting two days' leave because of illness. Use a proper format and polite language.</p><textarea name="application" style="min-height:220px" placeholder="Write your application here…"></textarea></div>
+<section class="section"><div class="section-head"><h2>Section E — Writing (10 marks)</h2><p>Choose ONE essay or application topic. Write your answer below.</p></div><div class="section-body">
+<div class="q"><p class="qtitle">Choose your writing task</p>
+<label for="writingType">Type</label><select id="writingType" name="writingType"><option value="essay">Essay (150–200 words)</option><option value="application">Formal application</option></select>
+<label for="writingTopic" style="display:block;margin-top:12px">Topic</label><select id="writingTopic" name="writingTopic"></select>
+<p id="writingPrompt" class="notice">Choose a topic to see the instructions.</p>
+<textarea name="writingAnswer" id="writingAnswer" style="min-height:240px" placeholder="Write your essay or application here…"></textarea>
+<div class="actions" style="margin-top:10px"><button type="button" class="secondary" id="reviewWritingBtn">Check writing structure</button><button type="button" class="secondary" id="copyWritingBtn">Copy answer to share for detailed review</button></div>
+<div id="writingFeedback" class="result" aria-live="polite"></div>
+<p class="feedback">The website checks word count and some format clues. For accurate marking of ideas, grammar and factual correctness, share your answer in this ChatGPT conversation and I’ll review it with marks and corrections.</p>
 </div></section>
 </form>
 <div class="actions" style="justify-content:center;margin:24px 0"><button class="gold" id="submitBtn2" type="button">Submit & check MCQs</button><button class="secondary" id="resetBtn" type="button">Start again</button></div>
@@ -103,7 +109,57 @@ const grammarData = [
 function renderChoices(target,data,prefix){const el=document.getElementById(target);el.innerHTML=data.map((q,i)=>'<div class="q"><p class="qtitle"><span class="qnum">'+(i+1)+'.</span>'+q[0]+' <span class="marks">(1 mark)</span></p><div class="options">'+q[1].map((o,j)=>'<label class="option"><input type="radio" name="'+prefix+i+'" value="'+j+'"><span>'+String.fromCharCode(65+j)+'. '+o+'</span></label>').join('')+'</div></div>').join('')}
 renderChoices('mcqs',mcqData,'m');renderChoices('grammar',grammarData,'g');
 const form=document.getElementById('paper'), fields=()=>Array.from(form.querySelectorAll('input,textarea,select'));
-const STORE='classIXEnglishPractice_v1';let seconds=10800,submitted=false;
+const STORE='classIXEnglishPractice_v2';let seconds=10800,submitted=false;
+
+const writingTasks={
+ essay:[
+ ["Merits and Demerits of Science","Write 150–200 words explaining the advantages and disadvantages of science, with examples and a balanced conclusion."],
+ ["AI: A Blessing or a Cause of Concern?","Write 150–200 words about the benefits and possible risks of artificial intelligence. Give examples and your own balanced opinion."],
+ ["A Picnic at the Seaside","Write 150–200 words describing a seaside picnic, including preparations, activities, atmosphere and what you enjoyed."]
+ ],
+ application:[
+ ["Visit to PAF Museum","Write an application to the Headmaster/Headmistress requesting permission to visit the PAF Museum with your class."],
+ ["Visit to the National Museum","Write an application to the Headmaster/Headmistress requesting permission to arrange a visit to the National Museum."],
+ ["Request for Extra Mathematics Classes","Write an application to the Headmaster/Headmistress requesting extra Mathematics classes to help students prepare for examinations."]
+ ]
+};
+function updateWritingTopics(){
+ const type=document.getElementById('writingType').value,topic=document.getElementById('writingTopic'),old=topic.value;
+ topic.innerHTML=writingTasks[type].map((t,i)=>'<option value="'+i+'">'+t[0]+'</option>').join('');
+ if([...topic.options].some(o=>o.value===old))topic.value=old;
+ document.getElementById('writingPrompt').textContent=writingTasks[type][Number(topic.value)][1];
+ document.getElementById('writingAnswer').placeholder=type==='essay'?'Write your 150–200 word essay here…':'Write your formal application here…';
+}
+document.getElementById('writingType').addEventListener('change',updateWritingTopics);
+document.getElementById('writingTopic').addEventListener('change',updateWritingTopics);
+updateWritingTopics();
+function reviewWriting(){
+ const type=document.getElementById('writingType').value,topic=writingTasks[type][Number(document.getElementById('writingTopic').value)][0],answer=document.getElementById('writingAnswer').value.trim();
+ const words=answer.match(/\b[\w’'-]+\b/g)||[],n=words.length,checks=[];
+ if(type==='essay'){
+  checks.push(['Word count (150–200)',n>=150&&n<=200,n+' words']);
+  checks.push(['Paragraph structure',answer.split(/\n\s*\n/).filter(x=>x.trim()).length>=3,'Use an introduction, body and conclusion in separate paragraphs.']);
+  checks.push(['Supporting points',/for example|for instance|firstly|secondly|moreover|however|because/i.test(answer),'Include reasons and specific examples.']);
+  checks.push(['Conclusion',/in conclusion|to conclude|finally|therefore|in short/i.test(answer),'End with a clear concluding sentence.']);
+ }else{
+  checks.push(['Recipient / salutation',/headmaster|headmistress|principal|respected sir|respected madam/i.test(answer),'Address the Headmaster/Headmistress politely.']);
+  checks.push(['Subject line',/subject\s*:/i.test(answer),'Add a clear Subject: line.']);
+  checks.push(['Reason and request',/request|permission|kindly|allow|arrange|extra classes|visit/i.test(answer),'Clearly state your reason and the action you want.']);
+  checks.push(['Closing and signature',/yours obediently|yours faithfully|yours sincerely/i.test(answer)&&/class|name|student/i.test(answer),'Close politely and add your name/class.']);
+ }
+ const passed=checks.filter(x=>x[1]).length,score=Math.round(passed/checks.length*10),box=document.getElementById('writingFeedback');
+ box.style.display='block';
+ box.innerHTML='<h2>Writing structure check: '+score+'/10 (preliminary)</h2><p><strong>Task:</strong> '+topic+' · '+n+' words</p>'+checks.map(x=>'<div class="review '+(x[1]?'correct':'wrong')+'"><strong>'+(x[1]?'✓':'✗')+' '+x[0]+'</strong><br><span class="feedback">'+x[2]+'</span></div>').join('')+'<p><strong>Note:</strong> This checklist cannot reliably judge whether your ideas are correct or every sentence is grammatically correct. Send your answer in this chat for detailed marking.</p>';
+ box.scrollIntoView({behavior:'smooth'});
+}
+document.getElementById('reviewWritingBtn').addEventListener('click',reviewWriting);
+document.getElementById('copyWritingBtn').addEventListener('click',()=>{
+ const type=document.getElementById('writingType').value,topic=writingTasks[type][Number(document.getElementById('writingTopic').value)][0],answer=document.getElementById('writingAnswer').value;
+ const textOut='Please review and mark my Class IX English '+type+'. Topic: '+topic+'\n\nMy answer:\n'+answer+'\n\nGive me marks out of 10, correct errors, explain what is right/wrong, and show an improved version.';
+ const ta=document.createElement('textarea');ta.value=textOut;document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();
+ const b=document.getElementById('copyWritingBtn');b.textContent=ok?'Copied — paste it in ChatGPT':'Please copy your answer manually';setTimeout(()=>b.textContent='Copy answer to share for detailed review',1800);
+});
+
 function countProgress(){const all=fields();const answered=all.filter(x=>x.type==='radio'?form.querySelector('input[name="'+x.name+'"]:checked')===x:x.value.trim()!=='').length;const total=new Set(all.map(x=>x.type==='radio'?x.name:x.name)).size;document.getElementById('answered').textContent=answered;document.getElementById('progressBar').style.width=(total?answered/total*100:0)+'%'}
 function save(){const data={};fields().forEach(x=>{if(x.type==='radio'){if(x.checked)data[x.name]=x.value}else data[x.name]=x.value});try{localStorage.setItem(STORE,JSON.stringify(data));}catch(e){}const b=document.getElementById('saveBtn');b.textContent='Saved ✓';setTimeout(()=>b.textContent='Save progress',1200)}
 function restore(){try{const data=JSON.parse(localStorage.getItem(STORE)||'{}');fields().forEach(x=>{if(!(x.name in data))return;if(x.type==='radio')x.checked=x.value===data[x.name];else x.value=data[x.name]})}catch(e){}countProgress()}
