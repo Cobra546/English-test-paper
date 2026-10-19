@@ -70,7 +70,7 @@ async function saveWritten(id,button){
  const input=el('written-'+id),raw=input.value.trim();
  if(raw!==''&&(!Number.isInteger(Number(raw))||Number(raw)<0||Number(raw)>60)){el('dashboardStatus').textContent='Written marks must be a whole number from 0 to 60.';return}
  button.disabled=true;button.textContent='Saving…';el('dashboardStatus').textContent='';
- const {error}=await db.from('english_paper_results').update({written_marks:raw===''?null:Number(raw)}).eq('id',id);
+ const {error}=await db.from('english_paper_code_results').update({written_marks:raw===''?null:Number(raw)}).eq('id',id);
  button.disabled=false;button.textContent='Save';
  if(error){el('dashboardStatus').textContent='Could not save: '+error.message;return}
  el('dashboardStatus').textContent='Written marks saved successfully.';el('dashboardStatus').className='status good';await loadResults();
