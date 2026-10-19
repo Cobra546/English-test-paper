@@ -1,21 +1,20 @@
-# English Paper — Supabase setup
+# English Paper — Student Codes & Admin Setup
 
-The student login asks for a name only. Under the hood it uses a Supabase anonymous session so each browser session can save its own submissions. This is not identity verification; students can choose another display name.
+## Student login flow
 
-## 1. Enable anonymous student sign-in
+- **New Student — Generate Code:** enter a unique name. Supabase generates a random 10-character code and shows it once.
+- **Returning Student — Enter Code:** enter the same name and saved code.
+- Save the code somewhere safe. It is not stored in the browser or displayed again after leaving the registration screen.
+- Names are unique (case-insensitive). If two students share a name, add a roll number or other identifier to the name.
 
-1. Open the Supabase project **Chapter 2**.
-2. Go to **Authentication → Sign In / Providers** (the exact menu label may vary).
-3. Enable **Anonymous Sign-Ins** and save.
-4. Keep Row Level Security enabled on both `english_paper_results` and `english_paper_admins`.
+The database tables, access-code verification RPCs, and Row Level Security policies have already been created in the Supabase project.
 
-The marks tables and access policies have already been created by the project migration.
+## 1. Create the admin account
 
-## 2. Create the admin account
-
-1. In Supabase, open **Authentication → Users** and create an admin user with an email and a strong password.
-2. Copy that user's UUID.
-3. Open **SQL Editor** and run the following query, replacing the UUID with the admin user's real UUID:
+1. Open Supabase project **Chapter 2**.
+2. Go to **Authentication → Users** and create an admin user with an email and a strong password.
+3. Copy that user's UUID.
+4. Open **SQL Editor** and run this query, replacing the UUID with the admin user's real UUID:
 
 ```sql
 insert into public.english_paper_admins (user_id)
@@ -23,20 +22,25 @@ values ('PASTE-ADMIN-USER-UUID-HERE')
 on conflict (user_id) do nothing;
 ```
 
-Only accounts listed in `english_paper_admins` can read every student's results or change written marks. Do not put an admin password or a Supabase secret/service-role key in the website code.
+Only accounts listed in `english_paper_admins` can read all student results or change written marks. The student access-code flow does not use Supabase anonymous sign-ins.
 
-## 3. Pages
+## 2. Open the pages
 
-- Student paper and name login: https://cobra546.github.io/English-test-paper/
+- Student paper: https://cobra546.github.io/English-test-paper/
 - Admin dashboard: https://cobra546.github.io/English-test-paper/admin.html
 
-GitHub Pages may take a little time to publish the newest commit. If Pages is not enabled for this repository, open the repository's **Settings → Pages** and publish from the `main` branch.
+GitHub Pages may take a little time to publish new commits. If Pages is not enabled, open the repository's **Settings → Pages** and publish from the `main` branch.
 
-## 4. How marks work
+## 3. Marks
 
-- The 20 textbook MCQs and 15 grammar MCQs are auto-marked and saved as **Objective /35**.
-- The admin enters **Written /60** after checking the student's written sections.
+- 20 textbook MCQs + 15 grammar MCQs = **Objective /35**, saved when the paper is submitted.
+- Admin enters **Written /60** after checking the written sections.
 - **Total /95** appears once written marks are entered.
-- Each submit creates a new result row, so repeat attempts are retained.
+- Every submission is retained as a separate attempt.
 
-If the student login says anonymous sign-in is disabled, return to step 1 and enable that setting.
+## Security notes
+
+- The access code is a secret credential; students should not share it.
+- Student names must be unique. A code is required to submit marks under an existing name.
+- Never put an admin password or Supabase service-role key in the public website.
+- If a student loses their code, an admin should verify the student and arrange a controlled reset rather than making a new account with the same name.
