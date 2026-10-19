@@ -12,9 +12,28 @@ header{background:linear-gradient(130deg,#102a43,#176b87);color:white;padding:30
 main{padding:20px 14px 50px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;background:white;border:1px solid var(--line);border-radius:16px;padding:13px 15px;position:sticky;top:0;z-index:5;box-shadow:0 5px 18px #102a4310}.status{font-weight:750}.status small{display:block;color:var(--muted);font-weight:500}.actions{display:flex;gap:8px;flex-wrap:wrap}button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:750;cursor:pointer;background:var(--navy);color:white}button.secondary{background:#e6f1f5;color:var(--navy)}button.gold{background:var(--gold);color:#102a43}button:focus,input:focus,textarea:focus,select:focus{outline:3px solid #f0b42990;outline-offset:2px}.progress{height:5px;background:#d9e2ec;border-radius:99px;overflow:hidden;margin-top:10px}.progress span{display:block;height:100%;background:var(--gold);width:0;transition:width .2s}
 .notice{margin:16px 0;background:#fff8e1;border:1px solid #f5d77a;padding:12px 15px;border-radius:12px;font-size:.93rem}.section{margin:18px 0;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:0 4px 16px #102a4308}.section-head{background:#eaf3f7;padding:16px 19px;border-bottom:1px solid var(--line)}.section-head h2{margin:0;color:var(--navy);font-size:1.22rem}.section-head p{margin:3px 0 0;color:var(--muted);font-size:.92rem}.section-body{padding:18px 19px}.q{padding:14px 0;border-bottom:1px dashed var(--line)}.q:last-child{border-bottom:0}.qtitle{font-weight:750;margin:0 0 10px}.qnum{color:var(--blue);margin-right:6px}.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}.option{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);padding:9px 11px;border-radius:10px;cursor:pointer}.option:hover{background:#f7fafc}.option input{margin-top:6px;accent-color:var(--blue)}textarea,input[type=text],select{width:100%;border:1px solid #bcccdc;border-radius:9px;padding:10px 11px;font:inherit;color:var(--ink);background:#fff}textarea{min-height:86px;resize:vertical}.small-answer{min-height:65px}.marks{font-size:.78rem;color:var(--muted);font-weight:650}.passage{background:#f7fafc;border-left:4px solid var(--blue);padding:14px 16px;border-radius:0 10px 10px 0}.passage p:first-child{margin-top:0}.passage p:last-child{margin-bottom:0}.poem-box{background:#f7fafc;border-radius:10px;padding:14px 16px;font-family:Georgia,serif;white-space:pre-line}.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.result{display:none;padding:18px;margin:18px 0;border-radius:14px;background:#e7f6ee;border:1px solid #9ed9b8}.result h2{margin:0 0 6px;color:#145c3c}.result strong.score{font-size:2rem;color:#145c3c}.feedback{font-size:.9rem;color:var(--muted)}.review{border:1px solid var(--line);border-radius:10px;padding:10px;margin:8px 0;background:white}.review.correct{border-color:#8bd1ac}.review.wrong{border-color:#f0a7a0}.footer{text-align:center;color:var(--muted);font-size:.85rem;padding:0 15px 30px}.timer{font-variant-numeric:tabular-nums;color:var(--blue)}.req{color:var(--red)}@media(max-width:600px){.toolbar{position:relative}.section-body{padding:13px}.section-head{padding:13px}.actions button{padding:9px 11px}}
 @media print{body{background:white;font-size:12px}header{background:white;color:#102a43;padding:10px}header p{color:#243b53}.toolbar,.notice,.progress,.footer,.actions{display:none!important}main{padding:0;max-width:none}.section{box-shadow:none;break-inside:avoid}.section-head{background:#eee}.section-body{padding:10px}textarea,input[type=text]{border:0;border-bottom:1px solid #999;border-radius:0;min-height:28px}.q{break-inside:avoid}}
+
+.login-overlay{position:fixed;inset:0;z-index:1000;background:linear-gradient(140deg,#102a43f5,#176b87f5);display:flex;align-items:center;justify-content:center;padding:18px}
+.login-card{width:min(100%,430px);background:white;color:var(--ink);border-radius:22px;padding:28px;box-shadow:0 22px 70px #0004}
+.login-card .login-mark{font-size:2.3rem}.login-card .eyebrow{color:var(--blue);margin:6px 0}.login-card h2{font-size:1.7rem;margin:5px 0 8px;color:var(--navy)}.login-card p{color:var(--muted)}
+.login-card label{display:block;font-weight:700;margin:18px 0 6px}.login-card button{width:100%;margin-top:14px;border:0;border-radius:10px;background:var(--blue);color:white;padding:12px 16px;font:inherit;font-weight:750;cursor:pointer}.login-error{color:var(--red)!important;font-size:.9rem;min-height:1.2em}
+
 </style>
 </head>
 <body>
+
+<div id="studentLogin" class="login-overlay">
+  <form id="studentLoginForm" class="login-card">
+    <div class="login-mark">📘</div>
+    <p class="eyebrow">CLASS IX • ENGLISH PRACTICE</p>
+    <h2>Welcome, Student!</h2>
+    <p>Enter your name to open the 95-mark practice paper. Your objective marks will be saved.</p>
+    <label for="studentName">Your name</label>
+    <input id="studentName" name="studentName" maxlength="80" autocomplete="name" required placeholder="Enter your full name">
+    <button id="studentLoginBtn" type="submit">Start Paper →</button>
+    <p id="studentLoginError" class="login-error" role="status"></p>
+  </form>
+</div>
 <header><div class="wrap">
 <div class="eyebrow">Board-style practice • Self-test</div>
 <h1>English — Class IX</h1>
@@ -28,7 +47,7 @@ main{padding:20px 14px 50px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-
 <div class="progress" style="flex-basis:100%"><span id="progressBar"></span></div>
 </div>
 <div class="notice"><strong>Instructions:</strong> Attempt the paper honestly without notes. Answer every section in the spaces provided. MCQs are checked automatically; written answers are for your own practice and are not auto-marked. The questions are original practice questions, not an official board paper.</div>
-<div id="result" class="result" aria-live="polite"><h2>Paper submitted 🎉</h2><div><strong class="score" id="score">0/20</strong> MCQ marks</div><p id="scoreText"></p><div id="reviewList"></div><button type="button" class="secondary" id="closeResult">Hide review</button></div>
+<div id="result" class="result" aria-live="polite"><h2>Paper submitted 🎉</h2><div><strong class="score" id="score">0/20</strong> MCQ marks</div><p id="scoreText"></p><div id="reviewList"></div><p id="cloudSaveStatus" class="feedback" aria-live="polite"></p><button type="button" class="secondary" id="closeResult">Hide review</button></div>
 <form id="paper">
 <section class="section"><div class="section-head"><h2>Section A — Objective (20 marks)</h2><p>Choose one correct answer for each question. 1 mark each.</p></div><div class="section-body" id="mcqs"></div></section>
 <section class="section"><div class="section-head"><h2>Section B — Reading Comprehension (10 marks)</h2><p>Read the passage and answer all five questions in your own words. Each answer carries 2 marks.</p></div><div class="section-body">
@@ -171,10 +190,67 @@ document.getElementById('copyWritingBtn').addEventListener('click',()=>{
 function countProgress(){const all=fields();const answered=all.filter(x=>x.type==='radio'?form.querySelector('input[name="'+x.name+'"]:checked')===x:x.value.trim()!=='').length;const total=new Set(all.map(x=>x.type==='radio'?x.name:x.name)).size;document.getElementById('answered').textContent=answered;document.getElementById('progressBar').style.width=(total?answered/total*100:0)+'%'}
 function save(){const data={};fields().forEach(x=>{if(x.type==='radio'){if(x.checked)data[x.name]=x.value}else data[x.name]=x.value});try{localStorage.setItem(STORE,JSON.stringify(data));}catch(e){}const b=document.getElementById('saveBtn');b.textContent='Saved ✓';setTimeout(()=>b.textContent='Save progress',1200)}
 function restore(){try{const data=JSON.parse(localStorage.getItem(STORE)||'{}');fields().forEach(x=>{if(!(x.name in data))return;if(x.type==='radio')x.checked=x.value===data[x.name];else x.value=data[x.name]})}catch(e){}countProgress()}
-function submit(){if(submitted&&document.getElementById('result').style.display==='block'){document.getElementById('result').scrollIntoView({behavior:'smooth'});return}submitted=true;let score=0,review='';mcqData.forEach((q,i)=>{const picked=form.querySelector('input[name="m'+i+'"]:checked');const options=q[2],answer=q[3],ok=!!picked&&Number(picked.value)===answer;if(ok)score++;review+='<div class="review '+(ok?'correct':'wrong')+'"><strong>'+(i+1)+'. '+(ok?'✓ Correct':'Review')+'</strong> — '+q[0]+': '+q[1]+'<br><span class="feedback">Correct answer: '+String.fromCharCode(65+answer)+'. '+options[answer]+(picked?' · Your answer: '+String.fromCharCode(65+Number(picked.value)):' · Not answered')+'</span></div>'});grammarData.forEach((q,i)=>{const picked=form.querySelector('input[name="g'+i+'"]:checked'),answer=q[2],options=q[1],ok=!!picked&&Number(picked.value)===answer;if(ok)score++;review+='<div class="review '+(ok?'correct':'wrong')+'"><strong>Grammar '+(i+1)+': '+(ok?'✓ Correct':'Review')+'</strong><br><span class="feedback">Correct answer: '+String.fromCharCode(65+answer)+'. '+options[answer]+'</span></div>'});document.getElementById('score').textContent=score+'/35';document.getElementById('scoreText').textContent='This score covers the objective questions only (20 textbook MCQs + 15 grammar MCQs). Written answers need self-review or teacher feedback.';document.getElementById('reviewList').innerHTML=review;document.getElementById('result').style.display='block';document.getElementById('result').scrollIntoView({behavior:'smooth'});save()}
+async function submit(){if(submitted&&document.getElementById('result').style.display==='block'){document.getElementById('result').scrollIntoView({behavior:'smooth'});return}submitted=true;let score=0,review='';mcqData.forEach((q,i)=>{const picked=form.querySelector('input[name="m'+i+'"]:checked');const options=q[2],answer=q[3],ok=!!picked&&Number(picked.value)===answer;if(ok)score++;review+='<div class="review '+(ok?'correct':'wrong')+'"><strong>'+(i+1)+'. '+(ok?'✓ Correct':'Review')+'</strong> — '+q[0]+': '+q[1]+'<br><span class="feedback">Correct answer: '+String.fromCharCode(65+answer)+'. '+options[answer]+(picked?' · Your answer: '+String.fromCharCode(65+Number(picked.value)):' · Not answered')+'</span></div>'});grammarData.forEach((q,i)=>{const picked=form.querySelector('input[name="g'+i+'"]:checked'),answer=q[2],options=q[1],ok=!!picked&&Number(picked.value)===answer;if(ok)score++;review+='<div class="review '+(ok?'correct':'wrong')+'"><strong>Grammar '+(i+1)+': '+(ok?'✓ Correct':'Review')+'</strong><br><span class="feedback">Correct answer: '+String.fromCharCode(65+answer)+'. '+options[answer]+'</span></div>'});document.getElementById('score').textContent=score+'/35';document.getElementById('scoreText').textContent='This score covers the objective questions only (20 textbook MCQs + 15 grammar MCQs). Written answers need self-review or teacher feedback.';document.getElementById('reviewList').innerHTML=review;document.getElementById('result').style.display='block';document.getElementById('result').scrollIntoView({behavior:'smooth'});save();await saveStudentResult(score)}
 fields().forEach(x=>x.addEventListener('input',()=>{countProgress();if(!submitted)save()}));document.getElementById('saveBtn').addEventListener('click',save);document.getElementById('printBtn').addEventListener('click',()=>window.print());document.getElementById('submitBtn').addEventListener('click',submit);document.getElementById('submitBtn2').addEventListener('click',submit);document.getElementById('closeResult').addEventListener('click',()=>document.getElementById('result').style.display='none');
 document.getElementById('resetBtn').addEventListener('click',()=>{if(confirm('Start again? This clears all saved answers and resets the timer.')){form.reset();try{localStorage.removeItem(STORE)}catch(e){}seconds=10800;submitted=false;document.getElementById('result').style.display='none';countProgress();}});
 function tick(){const h=String(Math.floor(seconds/3600)).padStart(2,'0'),m=String(Math.floor(seconds%3600/60)).padStart(2,'0'),s=String(seconds%60).padStart(2,'0');document.getElementById('timer').textContent=h+':'+m+':'+s;if(seconds>0)seconds--;else{document.getElementById('timer').textContent='Time is up';document.getElementById('timer').style.color='var(--red)'}}
 restore();tick();setInterval(tick,1000);
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const ENGLISH_SUPABASE_URL = "https://bhtyestavehwaymfozxw.supabase.co";
+const ENGLISH_SUPABASE_KEY = "sb_publishable_VpUhQZY8bczeIYv-oo8mLQ_YHPTjm7r";
+const englishSupabase = window.supabase.createClient(ENGLISH_SUPABASE_URL, ENGLISH_SUPABASE_KEY);
+let englishStudentName = "";
+document.getElementById('studentName').value = localStorage.getItem('englishStudentName') || "";
+document.getElementById('studentLoginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const name = document.getElementById('studentName').value.trim();
+  const errorBox = document.getElementById('studentLoginError');
+  const button = document.getElementById('studentLoginBtn');
+  if (!name) { errorBox.textContent = 'Please enter your name.'; return; }
+  button.disabled = true; button.textContent = 'Connecting…'; errorBox.textContent = '';
+  try {
+    let { data: sessionData, error: sessionError } = await englishSupabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (sessionData.session && !sessionData.session.user.is_anonymous) {
+      const signedOut = await englishSupabase.auth.signOut();
+      if (signedOut.error) throw signedOut.error;
+      sessionData = {session:null};
+    }
+    if (!sessionData.session) {
+      const authResult = await englishSupabase.auth.signInAnonymously();
+      if (authResult.error) throw authResult.error;
+    }
+    englishStudentName = name;
+    localStorage.setItem('englishStudentName', name);
+    document.getElementById('studentLogin').style.display = 'none';
+  } catch (error) {
+    errorBox.textContent = 'Supabase connection failed: ' + (error.message || 'Please enable Anonymous Sign-Ins in Supabase Auth settings and try again.');
+  } finally {
+    button.disabled = false; button.textContent = 'Start Paper →';
+  }
+});
+async function saveStudentResult(score) {
+  const status = document.getElementById('cloudSaveStatus');
+  try {
+    const { data: sessionData, error: sessionError } = await englishSupabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!sessionData.session || !sessionData.session.user.is_anonymous) throw new Error('Student session missing. Refresh and enter your name again.');
+    const { error } = await englishSupabase.from('english_paper_results').insert({
+      student_id: sessionData.session.user.id,
+      student_name: englishStudentName || localStorage.getItem('englishStudentName') || 'Student',
+      objective_marks: score
+    });
+    if (error) throw error;
+    status.textContent = '☁️ Marks saved to Supabase! Objective score: ' + score + '/35. Written marks will be added by the teacher/admin.';
+    status.style.color = 'var(--green)';
+  } catch (error) {
+    status.textContent = '⚠️ Could not save marks to Supabase: ' + (error.message || 'Check your connection and Supabase settings.');
+    status.style.color = 'var(--red)';
+  }
+}
+</script>
+
 </body></html>
